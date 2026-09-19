@@ -428,11 +428,14 @@ async function handleIssue(event, config) {
   }
 
   const repo = required(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
-  const maxIssues = Number(config.duplicate.maxIssues) || 300;
-  const candidates = await githubPaged(
+  const configuredMaxIssues = Number(config.duplicate.maxIssues);
+  const maxIssues = Number.isFinite(configuredMaxIssues)
+    ? Math.max(0, Math.floor(configuredMaxIssues))
+    : 300;
+  const candidates = (await githubPaged(
     "/repos/" + repo + "/issues?state=open&sort=created&direction=desc",
     Math.ceil(maxIssues / 100)
-  );
+  )).slice(0, maxIssues);
 
   const duplicates = findDuplicateIssues(issue, candidates, config);
   const result = {
