@@ -28,7 +28,7 @@ const DEFAULT_CONFIG = {
 };
 
 const STOPWORDS = new Set(
-  "a an and are as at be been being by can could did do does for from had has have how i if in is it its of on or our should that the their them then there this to was were what when where which who why will with you your".split(" ")
+  "a an and are as at be been being by can could did do does for from had has have how i if in is it its of on or our should that the their them then there this to was were what when where which who why will while with you your".split(" ")
 );
 
 function readBoolean(value, fallback) {
@@ -207,7 +207,7 @@ function analyze(files, config) {
 
   return {
     type: "pull_request",
-    version: "0.2.1",
+    version: "0.2.2",
     risk,
     attention,
     score,
@@ -319,7 +319,7 @@ function renderPrMarkdown(result) {
     "",
     "> Advisory only. MaintainerShield does not replace human review and does not block contributors by default.",
     "",
-    "<sub>MaintainerShield v0.2.1</sub>"
+    "<sub>MaintainerShield v0.2.2</sub>"
   ].join("\\n");
 }
 
@@ -340,7 +340,7 @@ function renderDuplicateMarkdown(duplicates) {
     "",
     "Please check the existing issues before opening another report. This is a suggestion, not an automatic decision.",
     "",
-    "<sub>MaintainerShield v0.2.1</sub>"
+    "<sub>MaintainerShield v0.2.2</sub>"
   ].join("\\n");
 }
 
@@ -370,14 +370,32 @@ function setStepSummary(markdown) {
 }
 
 
+async function findExistingReportComment(repo, issueNumber, maxPages) {
+  const pages = maxPages || 100;
+
+  for (let page = 1; page <= pages; page++) {
+    const comments = await github(
+      "/repos/" + repo + "/issues/" + issueNumber + "/comments?per_page=100&page=" + page
+    );
+
+    if (!Array.isArray(comments) || comments.length === 0) return null;
+
+    const existing = comments.find(comment =>
+      comment.user &&
+      comment.user.type === "Bot" &&
+      String(comment.body || "").includes(REPORT_MARKER)
+    );
+
+    if (existing) return existing;
+    if (comments.length < 100) return null;
+  }
+
+  return null;
+}
+
 async function postOrUpdateComment(repo, issueNumber, markdown) {
-  const comments = await githubPaged(
-    "/repos/" + repo + "/issues/" + issueNumber + "/comments",
-    3
-  );
-  const existing = comments.find(comment =>
-    comment.user && comment.user.type === "Bot" && String(comment.body || "").includes(REPORT_MARKER)
-  );
+  const existing = await findExistingReportComment(repo, issueNumber);
+
   if (existing) {
     await github("/repos/" + repo + "/issues/comments/" + existing.id, {
       method: "PATCH",
@@ -386,6 +404,7 @@ async function postOrUpdateComment(repo, issueNumber, markdown) {
     });
     return { action: "updated", id: existing.id };
   }
+
   const created = await github("/repos/" + repo + "/issues/" + issueNumber + "/comments", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -424,20 +443,23 @@ async function handlePullRequest(event, config) {
 async function handleIssue(event, config) {
   const issue = event.issue;
   if (!issue || !readBoolean(input("duplicate-issues"), true)) {
-    return { type: "issue", version: "0.2.1", duplicates: [] };
+    return { type: "issue", version: "0.2.2", duplicates: [] };
   }
 
   const repo = required(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
-  const maxIssues = Number(config.duplicate.maxIssues) || 300;
-  const candidates = await githubPaged(
+  const configuredMaxIssues = Number(config.duplicate.maxIssues);
+  const maxIssues = Number.isFinite(configuredMaxIssues)
+    ? Math.max(0, Math.floor(configuredMaxIssues))
+    : 300;
+  const candidates = (await githubPaged(
     "/repos/" + repo + "/issues?state=open&sort=created&direction=desc",
     Math.ceil(maxIssues / 100)
-  );
+  )).slice(0, maxIssues);
 
   const duplicates = findDuplicateIssues(issue, candidates, config);
   const result = {
     type: "issue",
-    version: "0.2.1",
+    version: "0.2.2",
     issue: {
       number: issue.number,
       title: issue.title,
@@ -493,7 +515,8 @@ module.exports = {
   findDuplicateIssues,
   renderPrMarkdown,
   renderDuplicateMarkdown,
-  loadConfig
+  loadConfig,
+  findExistingReportComment
 };
 
 if (require.main === module) {

@@ -37,7 +37,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-For production use, pin the action to a release tag after a tagged release is published.
+For production use, pin the action to a reviewed release tag or commit SHA.
 
 ## Pull request checks
 
@@ -113,7 +113,8 @@ Downstream automation can consume JSON without parsing Markdown.
 
 ## Roadmap
 
-### v0.3
+### v0.3 (next)
+- release-tagged distribution and immutable-version guidance;
 - configurable rule packs;
 - stronger duplicate detection;
 - OpenSSF/security-focused checks;

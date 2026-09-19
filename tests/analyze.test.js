@@ -74,7 +74,7 @@ test("PR reports include a stable marker for idempotent comments", () => {
     DEFAULT_CONFIG
   ));
   assert.match(markdown, /<!-- maintainer-shield-report -->/);
-  assert.match(markdown, /MaintainerShield v0\.2\.1/);
+  assert.match(markdown, /MaintainerShield v0\.2\.2/);
 });
 
 test("action file documents a GitHub token input", () => {
