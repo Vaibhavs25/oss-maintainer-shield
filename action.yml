@@ -30,6 +30,16 @@ inputs:
     required: false
     default: "false"
 
+outputs:
+  risk:
+    description: "Computed pull-request risk level"
+  score:
+    description: "Computed pull-request risk score"
+  changed-lines:
+    description: "Total changed lines"
+  duplicate-count:
+    description: "Number of suggested duplicate issues"
+
 runs:
   using: "node20"
   main: "src/index.js"
