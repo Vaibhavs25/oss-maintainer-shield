@@ -111,11 +111,11 @@ function analyze(files, config) {
   const reasons = [];
   const signals = [];
 
-  const testPattern = /(^|\\/)(test|tests|__tests__|spec|specs)(\\/|$)|\\.(test|spec)\\./i;
-  const docPattern = /(^|\\/)(readme|docs?|documentation)(\\/|$)|\\.(md|mdx|rst|txt)$/i;
-  const dependencyPattern = /(^|\\/)(package-lock\\.json|npm-shrinkwrap\\.json|yarn\\.lock|pnpm-lock\\.yaml|poetry\\.lock|uv\\.lock|Cargo\\.lock|Gemfile\\.lock|go\\.sum|composer\\.lock)$/i;
-  const workflowPattern = /^\\.github\\/workflows\\//i;
-  const generatedPattern = /(^|\\/)(dist|build|coverage|vendor|generated)(\\/|$)|\\.(min|bundle)\\.(js|css)$/i;
+  const testPattern = /(^|\x2f)(test|tests|__tests__|spec|specs)(\x2f|$)|\.(test|spec)\./i;
+  const docPattern = /(^|\x2f)(readme|docs?|documentation)(\x2f|$)|\.(md|mdx|rst|txt)$/i;
+  const dependencyPattern = /(^|\x2f)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|uv\.lock|Cargo\.lock|Gemfile\.lock|go\.sum|composer\.lock)$/i;
+  const workflowPattern = /^\.github\x2fworkflows\x2f/i;
+  const generatedPattern = /(^|\x2f)(dist|build|coverage|vendor|generated)(\x2f|$)|\.(min|bundle)\.(js|css)$/i;
 
   for (const file of files) {
     additions += Number(file.additions || 0);
