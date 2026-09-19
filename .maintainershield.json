@@ -1,0 +1,16 @@
+{
+  "pr": {
+    "largeChangeLines": 250,
+    "veryLargeChangeLines": 500,
+    "manyFiles": 10,
+    "veryManyFiles": 20,
+    "codeWithoutTests": 2,
+    "dependencyChange": 1,
+    "workflowChange": 1
+  },
+  "duplicate": {
+    "threshold": 0.72,
+    "titleWeight": 2,
+    "maxIssues": 300
+  }
+}
