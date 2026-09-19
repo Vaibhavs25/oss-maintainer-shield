@@ -219,7 +219,7 @@ function normalizeText(text) {
     .toLowerCase()
     
     .replace(/[^a-z0-9_]+/g, " ")
-    .split(/\\s+/)
+    .split(/\s+/)
     .filter(token => token.length >= 3 && !STOPWORDS.has(token));
 }
 
