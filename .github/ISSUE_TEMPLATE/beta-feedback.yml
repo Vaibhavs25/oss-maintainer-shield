@@ -1,0 +1,34 @@
+name: "MaintainerShield beta feedback"
+description: "Report a real-world false positive, false negative, or maintainer workflow problem"
+title: "[Beta] "
+labels:
+  - beta
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Repository
+      description: "Repository where MaintainerShield was tested"
+      placeholder: "owner/name"
+    validations:
+      required: true
+  - type: dropdown
+    id: event
+    attributes:
+      label: Event
+      options:
+        - Pull request
+        - Issue
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened?
+      description: "Include the rule, output, and what you expected."
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: What should MaintainerShield do instead?
+    validations:
+      required: false
