@@ -354,10 +354,9 @@ function setGithubOutput(name, value) {
   const outputFile = process.env.GITHUB_OUTPUT;
   if (!outputFile) return;
 
-  const delimiter = "MAINTAINERSHIELD_" + Date.now();
   fs.appendFileSync(
     outputFile,
-    name + "<<" + delimiter + "\\n" + String(value) + "\\n" + delimiter + "\\n",
+    name + "=" + String(value) + "\n",
     "utf8"
   );
 }
