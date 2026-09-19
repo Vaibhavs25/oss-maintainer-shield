@@ -370,14 +370,24 @@ function setStepSummary(markdown) {
 }
 
 
+async function findExistingReportComment(repo, issueNumber, maxPages) {
+  const pages = maxPages || 100;
+  for (let page = 1; page <= pages; page++) {
+    const comments = await github(
+      "/repos/" + repo + "/issues/" + issueNumber + "/comments?per_page=100&page=" + page
+    );
+    if (!Array.isArray(comments) || comments.length === 0) return null;
+    const existing = comments.find(comment =>
+      comment.user && comment.user.type === "Bot" && String(comment.body || "").includes(REPORT_MARKER)
+    );
+    if (existing) return existing;
+    if (comments.length < 100) return null;
+  }
+  return null;
+}
+
 async function postOrUpdateComment(repo, issueNumber, markdown) {
-  const comments = await githubPaged(
-    "/repos/" + repo + "/issues/" + issueNumber + "/comments",
-    3
-  );
-  const existing = comments.find(comment =>
-    comment.user && comment.user.type === "Bot" && String(comment.body || "").includes(REPORT_MARKER)
-  );
+  const existing = await findExistingReportComment(repo, issueNumber);
   if (existing) {
     await github("/repos/" + repo + "/issues/comments/" + existing.id, {
       method: "PATCH",
@@ -493,7 +503,8 @@ module.exports = {
   findDuplicateIssues,
   renderPrMarkdown,
   renderDuplicateMarkdown,
-  loadConfig
+  loadConfig,
+  findExistingReportComment
 };
 
 if (require.main === module) {
