@@ -75,10 +75,29 @@ jobs:
   shield:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vaibhavs25/oss-maintainer-shield@main
+      - uses: Vaibhavs25/oss-maintainer-shield@<reviewed-release-tag-or-commit-sha>
         with:
           github-token: \${{ secrets.GITHUB_TOKEN }}
 ```
+
+For beta testing and production use, pin the Action to a reviewed release tag or commit SHA rather than tracking `main`.
+
+## What we want to learn
+
+- Did the PR signals save review time?
+- Which duplicate-issue suggestions were useful or wrong?
+- What false positives or false negatives did you encounter?
+- What repository conventions should the default rules understand?
+
+## What to report
+
+Please report concrete false positives, false negatives, duplicate suggestions that are incorrect, or repository-specific conventions the defaults miss.
+
+Include the event type (`pull_request` or `issues`) and, where relevant, the rule or signal that fired.
+
+## Scope and expectations
+
+MaintainerShield is advisory. It does not replace human review and does not block contributors by default.
 
 ## What to record
 
