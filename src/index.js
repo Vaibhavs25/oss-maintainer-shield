@@ -204,6 +204,31 @@ function tokenSet(text) {
   return new Set(normalizeText(text));
 }
 
+function cosineSimilarity(a, b) {
+  const left = normalizeText(a);
+  const right = normalizeText(b);
+  if (left.length === 0 || right.length === 0) return 0;
+
+  const leftCounts = new Map();
+  const rightCounts = new Map();
+
+  for (const token of left) leftCounts.set(token, (leftCounts.get(token) || 0) + 1);
+  for (const token of right) rightCounts.set(token, (rightCounts.get(token) || 0) + 1);
+
+  let dot = 0;
+  let leftNorm = 0;
+  let rightNorm = 0;
+
+  for (const count of leftCounts.values()) leftNorm += count * count;
+  for (const count of rightCounts.values()) rightNorm += count * count;
+
+  for (const [token, count] of leftCounts) {
+    dot += count * (rightCounts.get(token) || 0);
+  }
+
+  return dot / (Math.sqrt(leftNorm) * Math.sqrt(rightNorm));
+}
+
 function jaccard(a, b) {
   if (a.size === 0 || b.size === 0) return 0;
   let intersection = 0;
@@ -214,8 +239,8 @@ function jaccard(a, b) {
 }
 
 function duplicateScore(current, candidate, config) {
-  const titleScore = jaccard(tokenSet(current.title), tokenSet(candidate.title));
-  const bodyScore = jaccard(tokenSet(current.body || ""), tokenSet(candidate.body || ""));
+  const titleScore = cosineSimilarity(current.title, candidate.title);
+  const bodyScore = cosineSimilarity(current.body || "", candidate.body || "");
   const titleWeight = Number((config || DEFAULT_CONFIG).duplicate.titleWeight) || 2;
   return (titleWeight * titleScore + bodyScore) / (titleWeight + 1);
 }
