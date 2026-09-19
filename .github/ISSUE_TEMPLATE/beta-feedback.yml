@@ -17,15 +17,35 @@ body:
     attributes:
       label: Event
       options:
-        - Pull request
-        - Issue
+        - pull_request
+        - issues
+  - type: textarea
+    id: review_time
+    attributes:
+      label: Did PR signals save review time?
+      description: "Share what changed in your review workflow."
+    validations:
+      required: false
+  - type: textarea
+    id: duplicate_feedback
+    attributes:
+      label: Which duplicate suggestions were useful or wrong?
+      description: "Include issue numbers if available."
+    validations:
+      required: false
   - type: textarea
     id: result
     attributes:
       label: What happened?
-      description: "Include the rule, output, and what you expected."
+      description: "Include the rule/signal, output, and what you expected."
     validations:
       required: true
+  - type: textarea
+    id: misses
+    attributes:
+      label: What repository conventions did defaults miss?
+    validations:
+      required: false
   - type: textarea
     id: improvement
     attributes:

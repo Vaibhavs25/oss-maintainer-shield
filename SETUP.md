@@ -22,12 +22,13 @@ jobs:
   shield:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vaibhavs25/oss-maintainer-shield@main
+      - uses: Vaibhavs25/oss-maintainer-shield@<reviewed-release-tag-or-commit-sha>
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 The current implementation posts reports as GitHub conversation comments, so the documented setup uses `issues: write` and `pull-requests: write`.
+For beta testing and production use, pin to a reviewed release tag or commit SHA instead of tracking `main`.
 
 ## 2. Test
 

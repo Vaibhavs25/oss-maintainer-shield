@@ -32,12 +32,25 @@ jobs:
   shield:
     runs-on: ubuntu-latest
     steps:
-      - uses: Vaibhavs25/oss-maintainer-shield@main
+      - uses: Vaibhavs25/oss-maintainer-shield@<reviewed-release-tag-or-commit-sha>
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-For production use, pin the action to a reviewed release tag or commit SHA.
+For beta testing and production use, pin the action to a reviewed release tag or commit SHA.
+
+## Beta feedback wanted
+
+We are looking for maintainers running MaintainerShield in real repositories.
+
+Please report:
+
+- whether PR signals reduced review time;
+- which duplicate-issue suggestions were useful or wrong;
+- any false positives or false negatives;
+- repository conventions the default rules should understand.
+
+Include the event type (`pull_request` or `issues`) and, where relevant, the rule or signal that fired.
 
 ## Pull request checks
 
