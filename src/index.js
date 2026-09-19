@@ -217,7 +217,7 @@ function analyze(files, config) {
 function normalizeText(text) {
   return String(text || "")
     .toLowerCase()
-    .replace(/\\bhttps?:\\/\\/\\S+/g, " ")
+    
     .replace(/[^a-z0-9_]+/g, " ")
     .split(/\\s+/)
     .filter(token => token.length >= 3 && !STOPWORDS.has(token));
