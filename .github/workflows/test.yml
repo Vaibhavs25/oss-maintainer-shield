@@ -3,9 +3,12 @@ name: test
 on:
   push:
   pull_request:
+  issues:
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: read
 
 jobs:
   test:
