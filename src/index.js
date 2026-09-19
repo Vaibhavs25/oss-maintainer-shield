@@ -1,8 +1,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+function input(name) {
+  const key = "INPUT_" + String(name).replace(/ /g, "_").toUpperCase();
+  return process.env[key] || "";
+}
+
 const EVENT_PATH = process.env.GITHUB_EVENT_PATH;
-const TOKEN = process.env.INPUT_GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+const TOKEN = input("github-token") || process.env.GITHUB_TOKEN;
 
 const DEFAULT_CONFIG = {
   pr: {
@@ -50,7 +55,7 @@ function mergeConfig(userConfig) {
 }
 
 function loadConfig() {
-  const configPath = process.env.INPUT_CONFIG || ".maintainershield.json";
+  const configPath = input("config") || ".maintainershield.json";
   if (!configPath || !fs.existsSync(configPath)) return structuredClone(DEFAULT_CONFIG);
 
   const raw = fs.readFileSync(configPath, "utf8").trim();
@@ -337,7 +342,7 @@ function renderDuplicateMarkdown(duplicates) {
 }
 
 function writeOutputFile(payload) {
-  const outputPath = process.env.INPUT_OUTPUT_JSON || "maintainer-shield.json";
+  const outputPath = input("output-json") || "maintainer-shield.json";
   if (!outputPath) return null;
 
   const absolute = path.resolve(outputPath);
@@ -377,7 +382,7 @@ async function handlePullRequest(event, config) {
   const result = analyze(files, config);
   const markdown = renderPrMarkdown(result);
 
-  if (readBoolean(process.env.INPUT_COMMENT, true)) {
+  if (readBoolean(input("comment"), true)) {
     await github("/repos/" + owner + "/" + repoName + "/issues/" + pr.number + "/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -395,7 +400,7 @@ async function handlePullRequest(event, config) {
 
 async function handleIssue(event, config) {
   const issue = event.issue;
-  if (!issue || !readBoolean(process.env.INPUT_DUPLICATE_ISSUES, true)) {
+  if (!issue || !readBoolean(input("duplicate-issues"), true)) {
     return { type: "issue", version: "0.2.0", duplicates: [] };
   }
 
@@ -421,7 +426,7 @@ async function handleIssue(event, config) {
   if (duplicates.length) {
     const markdown = renderDuplicateMarkdown(duplicates);
 
-    if (readBoolean(process.env.INPUT_COMMENT, true)) {
+    if (readBoolean(input("comment"), true)) {
       const parts = repo.split("/");
       await github("/repos/" + parts[0] + "/" + parts[1] + "/issues/" + issue.number + "/comments", {
         method: "POST",
@@ -447,7 +452,7 @@ async function main() {
   if (event.pull_request) {
     result = await handlePullRequest(event, config);
 
-    if (readBoolean(process.env.INPUT_FAIL_ON_HIGH, false) && result.risk === "HIGH") {
+    if (readBoolean(input("fail-on-high"), false) && result.risk === "HIGH") {
       process.exitCode = 1;
     }
   } else if (event.issue) {
