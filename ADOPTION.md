@@ -21,6 +21,19 @@ MaintainerShield grows through real use in repositories that have active mainten
 
 These counts are search snapshots, not claims about total project activity.
 
+## Verified maintainer contacts
+
+These are documented maintainers/owners for the first outreach pass, verified on 2026-09-19:
+
+| Repository | Maintainer / owner | GitHub handle | Contact route |
+|---|---|---|---|
+| ag2ai/ag2 | Qingyun Wu; Chi Wang | @qingyun-wu; @sonichi | Project README lists project administrators and `support@ag2.ai` |
+| DefectDojo/django-DefectDojo | Greg Anderson; Matt Tesauro | @devGregA; @mtesauro | Repository README identifies both as maintainers |
+| parca-dev/parca | Frederic Branczyk; Matthias Loibl | @brancz; @metalmatze | Repository `MAINTAINERS.md` identifies maintainers; project also lists `parca-team@googlegroups.com` |
+| tobymao/sqlglot | Toby Mao | @tobymao | Repository is owned by `tobymao`; public project contact is available through the repository |
+
+Use the documented project contact route where one exists. Do not mass-message every listed maintainer; start with one relevant contact per project and personalize the message around a concrete maintenance problem MaintainerShield addresses.
+
 ## Outreach rule
 
 Do not open promotional issues in repositories just to advertise MaintainerShield.
