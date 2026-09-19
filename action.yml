@@ -1,0 +1,19 @@
+name: "MaintainerShield"
+description: "Transparent maintainer-attention checks for GitHub pull requests"
+author: "Vaibhavs25"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  github-token:
+    description: "GitHub token used to read the pull request and post the report"
+    required: true
+  fail-on-high:
+    description: "Set to true to fail the action when risk is HIGH"
+    required: false
+    default: "false"
+
+runs:
+  using: "node20"
+  main: "src/index.js"
