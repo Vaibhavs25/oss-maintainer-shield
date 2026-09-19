@@ -111,24 +111,47 @@ function analyze(files, config) {
   const reasons = [];
   const signals = [];
 
-  const testPattern = /(^|\x2f)(test|tests|__tests__|spec|specs)(\x2f|$)|\.(test|spec)\./i;
-  const docPattern = /(^|\x2f)(readme|docs?|documentation)(\x2f|$)|\.(md|mdx|rst|txt)$/i;
-  const dependencyPattern = /(^|\x2f)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|uv\.lock|Cargo\.lock|Gemfile\.lock|go\.sum|composer\.lock)$/i;
-  const workflowPattern = /^\.github\x2fworkflows\x2f/i;
-  const generatedPattern = /(^|\x2f)(dist|build|coverage|vendor|generated)(\x2f|$)|\.(min|bundle)\.(js|css)$/i;
+  const dependencyNames = new Set([
+    "package-lock.json",
+    "npm-shrinkwrap.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "poetry.lock",
+    "uv.lock",
+    "cargo.lock",
+    "gemfile.lock",
+    "go.sum",
+    "composer.lock"
+  ]);
+  const testDirectoryNames = new Set(["test", "tests", "__tests__", "spec", "specs"]);
+  const docDirectoryNames = new Set(["readme", "docs", "doc", "documentation"]);
+  const generatedDirectoryNames = new Set(["dist", "build", "coverage", "vendor", "generated"]);
+
+  function fileSignals(name) {
+    const parts = name.toLowerCase().split("/");
+    const base = parts[parts.length - 1];
+    return {
+      isTest: parts.some(part => testDirectoryNames.has(part)) || /\.(test|spec)\./i.test(base),
+      isDoc: parts.some(part => docDirectoryNames.has(part)) || /\.(md|mdx|rst|txt)$/i.test(base),
+      isDependency: dependencyNames.has(base),
+      isWorkflow: name.toLowerCase().startsWith(".github/workflows/"),
+      isGenerated: parts.some(part => generatedDirectoryNames.has(part)) || /\.(min|bundle)\.(js|css)$/i.test(base)
+    };
+  }
 
   for (const file of files) {
     additions += Number(file.additions || 0);
     deletions += Number(file.deletions || 0);
     const name = file.filename || "";
 
-    if (testPattern.test(name)) testFiles++;
-    if (docPattern.test(name)) docFiles++;
-    if (dependencyPattern.test(name)) dependencyFiles++;
-    if (workflowPattern.test(name)) workflowFiles++;
-    if (generatedPattern.test(name)) generatedFiles++;
+    const flags = fileSignals(name);
+    if (flags.isTest) testFiles++;
+    if (flags.isDoc) docFiles++;
+    if (flags.isDependency) dependencyFiles++;
+    if (flags.isWorkflow) workflowFiles++;
+    if (flags.isGenerated) generatedFiles++;
 
-    if (!testPattern.test(name) && !docPattern.test(name) && !generatedPattern.test(name)) {
+    if (!flags.isTest && !flags.isDoc && !flags.isGenerated) {
       codeFiles++;
     }
   }
