@@ -28,7 +28,7 @@ const DEFAULT_CONFIG = {
 };
 
 const STOPWORDS = new Set(
-  "a an and are as at be been being by can could did do does for from had has have how i if in is it its of on or our should that the their them then there this to was were what when where which who why will with you your".split(" ")
+  "a an and are as at be been being by can could did do does for from had has have how i if in is it its of on or our should that the their them then there this to was were what when where which who why will while with you your".split(" ")
 );
 
 function readBoolean(value, fallback) {
