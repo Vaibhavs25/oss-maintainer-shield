@@ -6,6 +6,7 @@ const {
   analyze,
   duplicateScore,
   findDuplicateIssues,
+  renderPrMarkdown,
   DEFAULT_CONFIG
 } = require("../src/index.js");
 
@@ -65,6 +66,15 @@ test("duplicate detector ranks likely duplicates first", () => {
 
   const result = findDuplicateIssues(current, issues, DEFAULT_CONFIG);
   assert.equal(result[0].issue.number, 2);
+});
+
+test("PR reports include a stable marker for idempotent comments", () => {
+  const markdown = renderPrMarkdown(analyze(
+    [{ filename: "README.md", additions: 3, deletions: 0 }],
+    DEFAULT_CONFIG
+  ));
+  assert.match(markdown, /<!-- maintainer-shield-report -->/);
+  assert.match(markdown, /MaintainerShield v0\.2\.1/);
 });
 
 test("action file documents a GitHub token input", () => {

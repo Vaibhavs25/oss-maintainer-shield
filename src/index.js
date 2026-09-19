@@ -7,6 +7,7 @@ function input(name) {
 }
 
 const EVENT_PATH = process.env.GITHUB_EVENT_PATH;
+const REPORT_MARKER = "<!-- maintainer-shield-report -->";
 const TOKEN = input("github-token") || process.env.GITHUB_TOKEN;
 
 const DEFAULT_CONFIG = {
@@ -206,7 +207,7 @@ function analyze(files, config) {
 
   return {
     type: "pull_request",
-    version: "0.2.0",
+    version: "0.2.1",
     risk,
     attention,
     score,
@@ -301,6 +302,7 @@ function renderPrMarkdown(result) {
     : "- No additional repository signals.";
 
   return [
+    REPORT_MARKER,
     "## MaintainerShield",
     "",
     "**Risk:** " + result.risk + "  ",
@@ -317,7 +319,7 @@ function renderPrMarkdown(result) {
     "",
     "> Advisory only. MaintainerShield does not replace human review and does not block contributors by default.",
     "",
-    "<sub>MaintainerShield v0.2.0</sub>"
+    "<sub>MaintainerShield v0.2.1</sub>"
   ].join("\\n");
 }
 
@@ -329,6 +331,7 @@ function renderDuplicateMarkdown(duplicates) {
   );
 
   return [
+    REPORT_MARKER,
     "## MaintainerShield — possible duplicate",
     "",
     "This issue looks similar to one or more existing open issues.",
@@ -337,7 +340,7 @@ function renderDuplicateMarkdown(duplicates) {
     "",
     "Please check the existing issues before opening another report. This is a suggestion, not an automatic decision.",
     "",
-    "<sub>MaintainerShield v0.2.0</sub>"
+    "<sub>MaintainerShield v0.2.1</sub>"
   ].join("\\n");
 }
 
@@ -366,6 +369,31 @@ function setStepSummary(markdown) {
   if (summaryFile) fs.appendFileSync(summaryFile, markdown + "\\n", "utf8");
 }
 
+
+async function postOrUpdateComment(repo, issueNumber, markdown) {
+  const comments = await githubPaged(
+    "/repos/" + repo + "/issues/" + issueNumber + "/comments",
+    3
+  );
+  const existing = comments.find(comment =>
+    comment.user && comment.user.type === "Bot" && String(comment.body || "").includes(REPORT_MARKER)
+  );
+  if (existing) {
+    await github("/repos/" + repo + "/issues/comments/" + existing.id, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ body: markdown })
+    });
+    return { action: "updated", id: existing.id };
+  }
+  const created = await github("/repos/" + repo + "/issues/" + issueNumber + "/comments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body: markdown })
+  });
+  return { action: "created", id: created.id };
+}
+
 async function handlePullRequest(event, config) {
   const repo = required(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
   const parts = repo.split("/");
@@ -382,11 +410,7 @@ async function handlePullRequest(event, config) {
   const markdown = renderPrMarkdown(result);
 
   if (readBoolean(input("comment"), true)) {
-    await github("/repos/" + owner + "/" + repoName + "/issues/" + pr.number + "/comments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body: markdown })
-    });
+    await postOrUpdateComment(owner + "/" + repoName, pr.number, markdown);
   }
 
   setStepSummary(markdown);
@@ -400,7 +424,7 @@ async function handlePullRequest(event, config) {
 async function handleIssue(event, config) {
   const issue = event.issue;
   if (!issue || !readBoolean(input("duplicate-issues"), true)) {
-    return { type: "issue", version: "0.2.0", duplicates: [] };
+    return { type: "issue", version: "0.2.1", duplicates: [] };
   }
 
   const repo = required(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
@@ -413,7 +437,7 @@ async function handleIssue(event, config) {
   const duplicates = findDuplicateIssues(issue, candidates, config);
   const result = {
     type: "issue",
-    version: "0.2.0",
+    version: "0.2.1",
     issue: {
       number: issue.number,
       title: issue.title,
@@ -426,12 +450,7 @@ async function handleIssue(event, config) {
     const markdown = renderDuplicateMarkdown(duplicates);
 
     if (readBoolean(input("comment"), true)) {
-      const parts = repo.split("/");
-      await github("/repos/" + parts[0] + "/" + parts[1] + "/issues/" + issue.number + "/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: markdown })
-      });
+      await postOrUpdateComment(repo, issue.number, markdown);
     }
 
     setStepSummary(markdown);
