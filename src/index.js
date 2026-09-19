@@ -207,7 +207,7 @@ function analyze(files, config) {
 
   return {
     type: "pull_request",
-    version: "0.2.1",
+    version: "0.2.2",
     risk,
     attention,
     score,
@@ -319,7 +319,7 @@ function renderPrMarkdown(result) {
     "",
     "> Advisory only. MaintainerShield does not replace human review and does not block contributors by default.",
     "",
-    "<sub>MaintainerShield v0.2.1</sub>"
+    "<sub>MaintainerShield v0.2.2</sub>"
   ].join("\\n");
 }
 
@@ -340,7 +340,7 @@ function renderDuplicateMarkdown(duplicates) {
     "",
     "Please check the existing issues before opening another report. This is a suggestion, not an automatic decision.",
     "",
-    "<sub>MaintainerShield v0.2.1</sub>"
+    "<sub>MaintainerShield v0.2.2</sub>"
   ].join("\\n");
 }
 
@@ -424,7 +424,7 @@ async function handlePullRequest(event, config) {
 async function handleIssue(event, config) {
   const issue = event.issue;
   if (!issue || !readBoolean(input("duplicate-issues"), true)) {
-    return { type: "issue", version: "0.2.1", duplicates: [] };
+    return { type: "issue", version: "0.2.2", duplicates: [] };
   }
 
   const repo = required(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
@@ -437,7 +437,7 @@ async function handleIssue(event, config) {
   const duplicates = findDuplicateIssues(issue, candidates, config);
   const result = {
     type: "issue",
-    version: "0.2.1",
+    version: "0.2.2",
     issue: {
       number: issue.number,
       title: issue.title,
